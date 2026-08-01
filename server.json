@@ -3,7 +3,7 @@
   "name": "ai.ankimcp/anki-mcp-server",
   "title": "Anki MCP Server",
   "description": "MCP server for Anki flashcards: adaptive review, notes, media, and deck management via AnkiConnect.",
-  "version": "0.18.4",
+  "version": "0.20.1",
   "repository": {
     "url": "https://github.com/ankimcp/anki-mcp-server",
     "source": "github"
@@ -12,9 +12,9 @@
   "packages": [
     {
       "registryType": "npm",
-      "registryBaseUrl": "https://registry.npmjs.org",
+      "registryBaseUrl": "https://registry.npmjs.com",
       "identifier": "@ankimcp/anki-mcp-server",
-      "version": "0.18.4",
+      "version": "0.20.1",
       "transport": {
         "type": "stdio"
       }

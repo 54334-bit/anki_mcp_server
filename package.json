@@ -23,6 +23,7 @@
     "start:debug:http": "nest start --debug --watch --entryFile main-http",
     "start:prod:stdio": "node dist/main-stdio",
     "start:prod:http": "node dist/main-http",
+    "health-check": "node scripts/health-check.mjs",
     "lint": "eslint \"{src,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",

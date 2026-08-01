@@ -34,6 +34,12 @@ export { GuiUndoTool } from "./tools/gui-undo.tool";
 // Module
 import { Module, DynamicModule, Provider } from "@nestjs/common";
 import { AnkiConnectClient } from "../../clients/anki-connect.client";
+import { IdempotencyService } from "../../../services/idempotency.service";
+import { ConfirmationService } from "../../../services/confirmation.service";
+import { AuditLogService } from "../../../services/audit-log.service";
+import { AppConfigService } from "../../../app-config.service";
+import { APP_CONFIG } from "../../../config";
+import { ANKI_CONFIG } from "../../config/anki-config.interface";
 import { GuiBrowseTool } from "./tools/gui-browse.tool";
 import { GuiSelectCardTool } from "./tools/gui-select-card.tool";
 import { GuiSelectedNotesTool } from "./tools/gui-selected-notes.tool";
@@ -66,10 +72,18 @@ export const GUI_MCP_TOOLS = [
 ];
 
 // All providers for the module (includes infrastructure like AnkiConnectClient)
-const GUI_MCP_PRIMITIVES = [AnkiConnectClient, ...GUI_MCP_TOOLS];
+const GUI_MCP_PRIMITIVES = [
+  AnkiConnectClient,
+  IdempotencyService,
+  ConfirmationService,
+  AuditLogService,
+  ...GUI_MCP_TOOLS,
+];
 
 export interface McpPrimitivesAnkiGuiModuleOptions {
-  ankiConfigProvider: Provider;
+  ankiConfigProvider?: Provider;
+  /** Direct config value for ANKI_CONFIG (preferred over ankiConfigProvider) */
+  ankiConfigValue?: any;
   /** Required when ankiConfigProvider uses AppConfigService (provides APP_CONFIG dependency) */
   appConfigProvider?: Provider;
 }
@@ -78,8 +92,18 @@ export interface McpPrimitivesAnkiGuiModuleOptions {
 export class McpPrimitivesAnkiGuiModule {
   static forRoot(options: McpPrimitivesAnkiGuiModuleOptions): DynamicModule {
     const providers: Provider[] = [
-      options.ankiConfigProvider,
       ...GUI_MCP_PRIMITIVES,
+      // Provide ANKI_CONFIG directly from ankiConfigValue
+      {
+        provide: ANKI_CONFIG,
+        useValue: options.ankiConfigValue || {
+          ankiConnectUrl: 'http://localhost:8765',
+          ankiConnectApiKey: undefined,
+          ankiConnectApiVersion: 6,
+          ankiConnectTimeout: 5000,
+          readOnly: false,
+        },
+      },
     ];
 
     // Add appConfigProvider if provided (needed for AppConfigService injection)

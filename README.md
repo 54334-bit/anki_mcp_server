@@ -567,6 +567,58 @@ node --version
 
 **Solution:** Update Node.js to version 22.12.0+. You can download it from [nodejs.org](https://nodejs.org/) or use a version manager like [nvm](https://github.com/nvm-sh/nvm).
 
+### `'node' is not recognized` (Windows)
+
+If `npm run start:prod:stdio` or any `npm run` script fails with:
+```
+'node' is not recognized as an internal or external command
+```
+
+Node.js is installed but its directory is **not in the system PATH**.
+
+**Solutions (pick one):**
+
+1. **Add Node.js to PATH** (recommended) — add your Node.js install directory (e.g. `D:\...\node-v22.x-win-x64`) to the `PATH` environment variable, then restart your terminal.
+
+2. **Use the launcher script** (no PATH needed) — run `scripts\start-stdio.cmd` from the project root. It auto-detects `node.exe` in common locations. You can also set `ANKIMCP_NODE_EXE` to point directly at your `node.exe`.
+
+3. **Use the full path in your MCP client config** — point the `command` field at the absolute path of `node.exe` (see `trae-mcp-config.json` for an example).
+
+### Path with spaces breaks the server
+
+If you see `Cannot find module '...mcp'` (path truncated at a space), your project or Node.js path contains a space (e.g. `C:\My Projects\anki-mcp-server`). MCP clients that don't properly quote args will truncate at the space.
+
+**Solutions:**
+- Move the project to a path without spaces, **or**
+- Ensure your MCP client passes `args` as a proper JSON array (each element is one argv entry). The included `trae-mcp-config.json` is correct.
+
+### AnkiConnect not reachable
+
+If the server starts but tool calls fail with `fetch failed` or `ECONNREFUSED`:
+
+1. **Start the Anki desktop app** (not just the headless collection).
+2. **Install the AnkiConnect add-on** — code `2055492159` (Tools → Add-ons → Get Add-ons).
+3. **Verify port 8765** is open: `curl http://localhost:8765 -X POST -d '{"action":"version","version":6}'`
+
+### Running the health check
+
+A bundled diagnostic script checks Node version, build output, dependencies, AnkiConnect, and the MCP handshake in one pass:
+
+```bash
+node scripts/health-check.mjs
+```
+
+All five checks should pass. If any fail, the script prints a targeted hint.
+
+### Trae MCP configuration
+
+This repo includes [`trae-mcp-config.json`](./trae-mcp-config.json) as a ready-to-use config for the Trae IDE. To use it:
+
+1. Open Trae → Settings → MCP Servers.
+2. Import or paste the contents of `trae-mcp-config.json`.
+3. Adjust the `command` path to point at **your** `node.exe` if Node.js is not in PATH.
+4. Ensure Anki desktop is running with the AnkiConnect add-on.
+
 ## Development
 
 ### Transport Modes
@@ -913,6 +965,69 @@ This project follows [Semantic Versioning](https://semver.org/) with a pre-1.0 d
 ### MCPB spec evolution
 
 This project targets Anthropic's MCPB bundle specification, which is still evolving. We track the spec at [https://github.com/modelcontextprotocol/mcpb](https://github.com/modelcontextprotocol/mcpb) and may introduce breaking changes to stay compliant. Breaking changes are permitted under the 0.x.x versioning scheme.
+
+## Fork 来源与本地增强（Fork Origin & Local Enhancements）
+
+> 本节为 fork 仓库特有的补充说明，用以明确上游来源、本仓库相对上游的改动，以及已验证的本地运行环境。
+
+### 1. 上游框架（Upstream Framework）
+
+本仓库是 [`ankimcp/anki-mcp-server`](https://github.com/ankimcp/anki-mcp-server)（作者 Anatoly Tarnavsky，MIT 许可）的派生（fork），上游版本基线为 `0.18.4`。上游项目本身并非从零实现，而是构建于下列开源框架之上：
+
+| 层级 | 框架 / 组件 | 作用 |
+|------|-------------|------|
+| 应用框架 | [NestJS](https://nestjs.com/) | 提供依赖注入、模块化架构与生命周期管理 |
+| MCP 集成层 | [@rekog/mcp-nest](https://github.com/rekogsh/mcp-nest) | 将 MCP 协议接入 NestJS 的工具/资源/提示自动发现机制 |
+| MCP 协议 SDK | [@modelcontextprotocol/sdk](https://github.com/modelcontextprotocol/typescript-sdk) | MCP 官方 TypeScript SDK，提供传输与协议原语 |
+| Anki 通信层 | [AnkiConnect](https://github.com/FooSoft/anki-connect) | Anki 桌面端 HTTP 插件（add-on 代码 `2055492159`），本服务经其 `http://localhost:8765` 与 Anki 交互 |
+
+即：**原框架为 `ankimcp/anki-mcp-server`，本仓库在此之上进行安全加固与工程化增强**。
+
+### 2. 本 fork 的改动（Changes in This Fork）
+
+相较上游 `0.18.4` 基线，本 fork 在 `0.20.1` 版本中引入以下改动（完整记录见 [`CHANGELOG.md`](./CHANGELOG.md)）：
+
+- **破坏性操作两步确认**：`deleteNotes`、`deleteMediaFile`、`clearUnusedTags` 等不可逆操作须经 `ConfirmationService` 配合 `confirmAction` 工具显式二次确认后方可执行。
+- **HTTP 传输 API Key 鉴权**：新增 `ApiKeyGuard`，支持 `Authorization: Bearer`、`X-API-Key` 及查询参数 `?api_key=` 三种传递方式。
+- **审计日志**：所有破坏性操作写入 `~/.anki-mcp-server/audit.log`，便于事后追溯。
+- **幂等性支持**：在 note 创建路径引入幂等机制，防止客户端重试导致的重复创建。
+- **HTTP 速率限制**：新增速率限制守卫，缓解滥用与暴力调用。
+- **缺陷修复**：修正 `app.module.ts` 中配置字段名映射（`url` → `ankiConnectUrl`），该缺陷曾导致 AnkiConnect URL 被解析为 `undefined`。
+- **工具链增强**：新增 `scripts/health-check.mjs` 环境诊断脚本与 `scripts/start-stdio.cmd` Windows 启动器（无需将 Node.js 加入 `PATH` 即可运行）。
+- **开源治理**：补充 `CONTRIBUTING.md`、`CODE_OF_CONDUCT.md`、`SECURITY.md`、GitHub issue/PR 模板与 `dependabot.yml`，使其符合开源协作规范。
+- **配置同步**：`server.json` 版本同步（`0.18.4` → `0.20.1`）；`trae-mcp-config.json` 精简为可移植的 Trae IDE 配置模板。
+
+### 3. 环境限制与本地测试声明（Environmental Constraints & Local Test Statement）
+
+本服务存在以下潜在环境限制：
+
+- **运行时**：Node.js ≥ `22.12.0`（Node.js 20 已于 2026-04-30 EOL，不再受支持）。
+- **Anki 侧**：须运行 Anki 桌面端并安装 AnkiConnect 插件（add-on 代码 `2055492159`），默认监听 `http://localhost:8765`。
+- **路径限制**：项目路径或 Node.js 安装路径若含空格，部分 MCP 客户端可能因参数截断导致启动失败；此时应使用 `trae-mcp-config.json` 中以 JSON 数组形式给出的 `args`，或改用 `scripts/start-stdio.cmd` 启动器。
+- **PATH 限制**：若 `node` 不在系统 `PATH`，需在 MCP 客户端配置中将 `command` 指向 `node.exe` 的绝对路径。
+- **平台**：`manifest.json` 声明支持 `darwin` / `linux` / `win32`。
+
+**本地测试声明**：本 fork 已在维护者的本地环境通过 `scripts/health-check.mjs` 全部五项检查（Node 版本、构建产物、依赖完整性、AnkiConnect 连通性、MCP 握手），结果如下：
+
+| 检查项 | 结果 |
+|--------|------|
+| Node.js 版本 | `v22.22.3`（win-x64，满足 ≥ 22.12.0） |
+| 构建产物 | `dist/main-stdio.js` 存在 |
+| 依赖完整性 | `node_modules/` 已填充 |
+| AnkiConnect | `http://localhost:8765` 可达，API `v6` |
+| MCP 握手 | 服务端响应正常，注册 56 项工具 |
+
+本地环境配置摘要：
+
+| 项 | 值 |
+|---|---|
+| 操作系统 | Windows 11 Home China |
+| Node.js | `v22.22.3`，路径 `D:\dd\exe origin\nodejs\node-v22.22.3-win-x64\node.exe`（不在 `PATH`，路径含空格） |
+| Anki | 桌面端运行中，AnkiConnect 插件已启用 |
+| 项目路径 | `D:\dd\projects\project1_cad_mcp_server_and_geminiapi\mcp servers\anki-mcp-server-fork`（路径含空格） |
+| 验证命令 | `node scripts/health-check.mjs`（5 passed, 0 failed） |
+
+> 注：因本地 `node` 不在 `PATH` 且路径含空格，实际通过 `node.exe` 绝对路径执行；该情形已被 `scripts/start-stdio.cmd` 启动器与 `trae-mcp-config.json` 模板覆盖。
 
 ## Similar Projects
 

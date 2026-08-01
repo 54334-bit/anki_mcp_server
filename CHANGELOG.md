@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.20.1] - 2026-07
+- **Security hardening (fork)**: two-step confirmation for destructive operations (`deleteNotes`, `deleteMediaFile`, `clearUnusedTags`) via `ConfirmationService` + `confirmAction` tool.
+- **API key authentication** for HTTP mode (`ApiKeyGuard` — supports `Authorization: Bearer`, `X-API-Key`, and `?api_key=`).
+- **Audit logging** to `~/.anki-mcp-server/audit.log` for all destructive actions.
+- **Idempotency support** to prevent duplicate note creation on retries.
+- **Rate limiting** guard for HTTP transport.
+- **Fix**: field-name mapping in `app.module.ts` (`url` → `ankiConnectUrl`) that caused AnkiConnect URL to be `undefined`.
+- **Tooling**: added `scripts/health-check.mjs` environment diagnostic and `scripts/start-stdio.cmd` Windows launcher (no PATH required).
+- **Docs**: added CONTRIBUTING.md, CODE_OF_CONDUCT.md, GitHub issue/PR templates, dependabot.yml; reorganized debug docs into `docs/`.
+- **Config**: `server.json` version sync (0.18.4 → 0.20.1); `trae-mcp-config.json` cleaned as a portable template.
+- **README**: expanded Troubleshooting with PATH issues, space-in-path, AnkiConnect, and Trae configuration sections.
+
 ## [0.18.0] - 2026-04
 - `changeDeck` + `rate_card` now validate card IDs via `cardsInfo` before mutation (was silent-success on invalid IDs).
 - `collection_stats` + `deckStats` add an `other` bucket so `total == new + learning + review + other` (captures suspended/buried cards); `per_deck` invariant: length always matches `total_decks`.

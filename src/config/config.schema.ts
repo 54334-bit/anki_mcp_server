@@ -10,6 +10,12 @@ export const configSchema = z.object({
   host: z.string().default("127.0.0.1"),
   nodeEnv: z.enum(["development", "production", "test"]).default("development"),
 
+  // API Key (for authentication)
+  apiKey: z.string().optional(),
+
+  // Rate Limiting
+  rateLimitPerMinute: z.coerce.number().int().positive().default(60),
+
   // AnkiConnect
   ankiConnect: z.object({
     url: z.string().url().default("http://localhost:8765"),
@@ -56,6 +62,8 @@ export function transformEnvToConfig(env: Record<string, any>): any {
     port: env.PORT,
     host: env.HOST,
     nodeEnv: env.NODE_ENV,
+    apiKey: env.API_KEY,
+    rateLimitPerMinute: env.RATE_LIMIT_PER_MINUTE,
     ankiConnect: {
       url: env.ANKI_CONNECT_URL,
       apiKey: env.ANKI_CONNECT_API_KEY,

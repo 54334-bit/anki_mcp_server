@@ -4,24 +4,50 @@ import {
   AnkiConnectClient,
   AnkiConnectError,
 } from "../../../../clients/anki-connect.client";
+import { ConfirmationService } from "../../../../../services/confirmation.service";
+import { AuditLogService } from "../../../../../services/audit-log.service";
 import { mockNotes } from "../../../../../test-fixtures/mock-data";
 import { parseToolResult } from "../../../../../test-fixtures/test-helpers";
 
 jest.mock("../../../../clients/anki-connect.client");
+jest.mock("../../../../../services/confirmation.service");
+jest.mock("../../../../../services/audit-log.service");
 
 describe("DeleteNotesTool", () => {
   let tool: DeleteNotesTool;
   let ankiClient: jest.Mocked<AnkiConnectClient>;
+  let confirmationService: jest.Mocked<ConfirmationService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [DeleteNotesTool, AnkiConnectClient],
+      providers: [
+        DeleteNotesTool,
+        AnkiConnectClient,
+        {
+          provide: ConfirmationService,
+          useValue: {
+            createPendingAction: jest.fn().mockReturnValue('test-confirmation-id'),
+            isConfirmed: jest.fn().mockReturnValue(true),
+            removeAction: jest.fn(),
+          },
+        },
+        {
+          provide: AuditLogService,
+          useValue: {
+            logDestructiveAction: jest.fn(),
+            logActionCompletion: jest.fn(),
+          },
+        },
+      ],
     }).compile();
 
     tool = module.get<DeleteNotesTool>(DeleteNotesTool);
     ankiClient = module.get(
       AnkiConnectClient,
     ) as jest.Mocked<AnkiConnectClient>;
+    confirmationService = module.get(
+      ConfirmationService,
+    ) as jest.Mocked<ConfirmationService>;
 
     jest.clearAllMocks();
   });
@@ -34,16 +60,16 @@ describe("DeleteNotesTool", () => {
       // Act
       const rawResult = await tool.deleteNotes({
         notes: noteIds,
-        confirmDeletion: false,
       });
       const result = parseToolResult(rawResult);
 
       // Assert
       expect(ankiClient.invoke).not.toHaveBeenCalled();
       expect(result.success).toBe(false);
-      expect(result.error).toContain("Deletion not confirmed");
-      expect(result.hint).toContain("Set confirmDeletion to true");
-      expect(result.warning).toContain("This action cannot be undone!");
+      expect(result.confirmationId).toBeDefined();
+      expect(result.pendingAction).toBe(true);
+      expect(result.hint).toContain("confirmAction");
+      expect(result.warning).toContain("permanently delete");
     });
 
     it("should successfully delete notes with confirmation", async () => {
@@ -61,7 +87,7 @@ describe("DeleteNotesTool", () => {
       // Act
       const rawResult = await tool.deleteNotes({
         notes: noteIds,
-        confirmDeletion: true,
+        confirmationId: 'test-confirmation-id',
       });
       const result = parseToolResult(rawResult);
 
@@ -104,7 +130,7 @@ describe("DeleteNotesTool", () => {
       // Act
       const rawResult = await tool.deleteNotes({
         notes: noteIds,
-        confirmDeletion: true,
+        confirmationId: 'test-confirmation-id',
       });
       const result = parseToolResult(rawResult);
 
@@ -131,7 +157,7 @@ describe("DeleteNotesTool", () => {
       // Act
       const rawResult = await tool.deleteNotes({
         notes: noteIds,
-        confirmDeletion: true,
+        confirmationId: 'test-confirmation-id',
       });
       const result = parseToolResult(rawResult);
 
@@ -159,7 +185,7 @@ describe("DeleteNotesTool", () => {
       // Act
       const rawResult = await tool.deleteNotes({
         notes: noteIds,
-        confirmDeletion: true,
+        confirmationId: 'test-confirmation-id',
       });
       const result = parseToolResult(rawResult);
 
@@ -176,7 +202,7 @@ describe("DeleteNotesTool", () => {
       // Act
       const rawResult = await tool.deleteNotes({
         notes: noteIds,
-        confirmDeletion: true,
+        confirmationId: 'test-confirmation-id',
       });
       const result = parseToolResult(rawResult);
 
@@ -198,7 +224,7 @@ describe("DeleteNotesTool", () => {
       // Act
       const rawResult = await tool.deleteNotes({
         notes: noteIds,
-        confirmDeletion: true,
+        confirmationId: 'test-confirmation-id',
       });
       const result = parseToolResult(rawResult);
 
@@ -218,7 +244,7 @@ describe("DeleteNotesTool", () => {
       // Act
       const rawResult = await tool.deleteNotes({
         notes: tooManyNotes,
-        confirmDeletion: true,
+        confirmationId: 'test-confirmation-id',
       });
       const result = parseToolResult(rawResult);
 
@@ -237,7 +263,7 @@ describe("DeleteNotesTool", () => {
       // Act
       const rawResult = await tool.deleteNotes({
         notes: [mockNotes.spanish.noteId],
-        confirmDeletion: true,
+        confirmationId: 'test-confirmation-id',
       });
       const result = parseToolResult(rawResult);
 
@@ -254,7 +280,7 @@ describe("DeleteNotesTool", () => {
       // Act
       const _rawResult = await tool.deleteNotes({
         notes: [mockNotes.spanish.noteId],
-        confirmDeletion: true,
+        confirmationId: 'test-confirmation-id',
       });
 
       // Assert
@@ -274,7 +300,7 @@ describe("DeleteNotesTool", () => {
       // Act
       const rawResult = await tool.deleteNotes({
         notes: [mockNotes.spanish.noteId],
-        confirmDeletion: true,
+        confirmationId: 'test-confirmation-id',
       });
       const result = parseToolResult(rawResult);
 
@@ -293,7 +319,7 @@ describe("DeleteNotesTool", () => {
       // Act
       const rawResult = await tool.deleteNotes({
         notes: noteIds,
-        confirmDeletion: true,
+        confirmationId: 'test-confirmation-id',
       });
       const result = parseToolResult(rawResult);
 
@@ -311,7 +337,7 @@ describe("DeleteNotesTool", () => {
       // Act
       const rawResult = await tool.deleteNotes({
         notes: [mockNotes.spanish.noteId],
-        confirmDeletion: true,
+        confirmationId: 'test-confirmation-id',
       });
       const result = parseToolResult(rawResult);
 

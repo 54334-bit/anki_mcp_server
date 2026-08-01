@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$comment": "Trae / MCP client configuration for the Anki MCP Server (STDIO mode). Copy this into Trae Settings → MCP Servers, or import the file directly. Adjust 'command' to the absolute path of your node.exe if Node.js is not in your system PATH. The Anki desktop app must be running with the AnkiConnect add-on (code 2055492159) for tool calls to succeed.",
+  "mcpServers": {
+    "anki": {
+      "command": "node",
+      "args": [
+        "dist/main-stdio.js"
+      ],
+      "env": {
+        "ANKI_CONNECT_URL": "http://localhost:8765",
+        "ANKI_CONNECT_API_VERSION": "6",
+        "ANKI_CONNECT_TIMEOUT": "5000",
+        "LOG_LEVEL": "info",
+        "READ_ONLY": "false",
+        "ENABLE_AUDIT_LOG": "true",
+        "REQUIRE_CONFIRMATION": "true"
+      }
+    }
+  }
+}

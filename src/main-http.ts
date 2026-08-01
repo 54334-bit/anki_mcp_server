@@ -6,6 +6,8 @@ import {
   LOG_DESTINATION,
 } from "./bootstrap";
 import { OriginValidationGuard } from "./http/guards/origin-validation.guard";
+import { ApiKeyGuard } from "./http/guards/api-key.guard";
+import { RateLimitGuard } from "./http/guards/rate-limit.guard";
 import {
   parseCliArgs,
   parseOptionalUrl,
@@ -59,6 +61,21 @@ async function bootstrap() {
 
   // Apply security guards (required by MCP Streamable HTTP spec)
   app.useGlobalGuards(new OriginValidationGuard());
+
+  // Apply API Key authentication guard if API_KEY is configured
+  const apiKey = process.env.API_KEY;
+  if (apiKey) {
+    app.useGlobalGuards(app.get(ApiKeyGuard));
+    cli.info("API Key authentication enabled");
+  } else {
+    cli.warn("API_KEY not set - HTTP server running without authentication");
+    cli.warn("Set API_KEY environment variable to enable authentication");
+  }
+
+  // Apply rate limiting guard
+  app.useGlobalGuards(app.get(RateLimitGuard));
+  const rateLimit = process.env.RATE_LIMIT_PER_MINUTE || "60";
+  cli.info(`Rate limiting enabled: ${rateLimit} requests per minute`);
 
   await app.listen(options.port, options.host);
 

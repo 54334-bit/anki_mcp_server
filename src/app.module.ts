@@ -21,6 +21,12 @@ import {
 } from "@/config";
 import { MCP_ICONS } from "./mcp/mcp-icons";
 import { TunnelMcpService } from "./tunnel/tunnel-mcp.service";
+import { ConfirmationService } from "./services/confirmation.service";
+import { AuditLogService } from "./services/audit-log.service";
+import { IdempotencyService } from "./services/idempotency.service";
+import { ConfirmActionTool } from "./mcp/primitives/essential/tools/confirm-action.tool";
+import { ApiKeyGuard } from "./http/guards/api-key.guard";
+import { RateLimitGuard } from "./http/guards/rate-limit.guard";
 
 @Module({})
 export class AppModule {
@@ -54,9 +60,12 @@ export class AppModule {
 
         // Import MCP primitives with config
         McpPrimitivesAnkiEssentialModule.forRoot({
-          ankiConfigProvider: {
-            provide: ANKI_CONFIG,
-            useClass: AppConfigService,
+          ankiConfigValue: {
+            ankiConnectUrl: validatedConfig.ankiConnect.url,
+            ankiConnectApiKey: validatedConfig.ankiConnect.apiKey,
+            ankiConnectApiVersion: validatedConfig.ankiConnect.apiVersion,
+            ankiConnectTimeout: validatedConfig.ankiConnect.timeout,
+            readOnly: validatedConfig.readOnly,
           },
           appConfigProvider: {
             provide: APP_CONFIG,
@@ -66,9 +75,12 @@ export class AppModule {
 
         // Import GUI primitives with config
         McpPrimitivesAnkiGuiModule.forRoot({
-          ankiConfigProvider: {
-            provide: ANKI_CONFIG,
-            useClass: AppConfigService,
+          ankiConfigValue: {
+            ankiConnectUrl: validatedConfig.ankiConnect.url,
+            ankiConnectApiKey: validatedConfig.ankiConnect.apiKey,
+            ankiConnectApiVersion: validatedConfig.ankiConnect.apiVersion,
+            ankiConnectTimeout: validatedConfig.ankiConnect.timeout,
+            readOnly: validatedConfig.readOnly,
           },
           appConfigProvider: {
             provide: APP_CONFIG,
@@ -83,10 +95,14 @@ export class AppModule {
           useValue: validatedConfig,
         },
         AppConfigService,
+        ConfirmationService,
+        AuditLogService,
+        IdempotencyService,
+        ConfirmActionTool,
         ...ESSENTIAL_MCP_TOOLS,
         ...GUI_MCP_TOOLS,
       ],
-      exports: [APP_CONFIG, AppConfigService],
+      exports: [APP_CONFIG, AppConfigService, ConfirmationService, AuditLogService, IdempotencyService],
     };
   }
 
@@ -121,9 +137,12 @@ export class AppModule {
 
         // Import MCP primitives with config
         McpPrimitivesAnkiEssentialModule.forRoot({
-          ankiConfigProvider: {
-            provide: ANKI_CONFIG,
-            useClass: AppConfigService,
+          ankiConfigValue: {
+            ankiConnectUrl: validatedConfig.ankiConnect.url,
+            ankiConnectApiKey: validatedConfig.ankiConnect.apiKey,
+            ankiConnectApiVersion: validatedConfig.ankiConnect.apiVersion,
+            ankiConnectTimeout: validatedConfig.ankiConnect.timeout,
+            readOnly: validatedConfig.readOnly,
           },
           appConfigProvider: {
             provide: APP_CONFIG,
@@ -133,9 +152,12 @@ export class AppModule {
 
         // Import GUI primitives with config
         McpPrimitivesAnkiGuiModule.forRoot({
-          ankiConfigProvider: {
-            provide: ANKI_CONFIG,
-            useClass: AppConfigService,
+          ankiConfigValue: {
+            ankiConnectUrl: validatedConfig.ankiConnect.url,
+            ankiConnectApiKey: validatedConfig.ankiConnect.apiKey,
+            ankiConnectApiVersion: validatedConfig.ankiConnect.apiVersion,
+            ankiConnectTimeout: validatedConfig.ankiConnect.timeout,
+            readOnly: validatedConfig.readOnly,
           },
           appConfigProvider: {
             provide: APP_CONFIG,
@@ -150,10 +172,16 @@ export class AppModule {
           useValue: validatedConfig,
         },
         AppConfigService,
+        ConfirmationService,
+        AuditLogService,
+        IdempotencyService,
+        ConfirmActionTool,
+        ApiKeyGuard,
+        RateLimitGuard,
         ...ESSENTIAL_MCP_TOOLS,
         ...GUI_MCP_TOOLS,
       ],
-      exports: [APP_CONFIG, AppConfigService],
+      exports: [APP_CONFIG, AppConfigService, ConfirmationService, AuditLogService, IdempotencyService],
     };
   }
 
@@ -217,11 +245,15 @@ export class AppModule {
         AppConfigService,
         // Custom tunnel MCP service (instead of StdioModule)
         TunnelMcpService,
+        ConfirmationService,
+        AuditLogService,
+        IdempotencyService,
+        ConfirmActionTool,
         // MCP-Nest requires tools in root module providers for discovery
         ...ESSENTIAL_MCP_TOOLS,
         ...GUI_MCP_TOOLS,
       ],
-      exports: [APP_CONFIG, AppConfigService, TunnelMcpService],
+      exports: [APP_CONFIG, AppConfigService, TunnelMcpService, ConfirmationService, AuditLogService, IdempotencyService],
     };
   }
 }

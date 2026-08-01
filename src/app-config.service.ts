@@ -38,6 +38,18 @@ export class AppConfigService implements IAnkiConfig {
     return this.nodeEnv === "test";
   }
 
+  // ===== API Key Configuration =====
+
+  get apiKey(): string | undefined {
+    return this.config.apiKey;
+  }
+
+  // ===== Rate Limiting Configuration =====
+
+  get rateLimitPerMinute(): number {
+    return this.config.rateLimitPerMinute;
+  }
+
   // ===== AnkiConnect Configuration (IAnkiConfig implementation) =====
 
   get ankiConnectUrl(): string {

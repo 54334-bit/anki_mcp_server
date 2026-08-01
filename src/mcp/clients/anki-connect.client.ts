@@ -4,6 +4,7 @@ import ky, { KyInstance, HTTPError } from "ky";
 import { ANKI_CONFIG } from "../config/anki-config.interface";
 import type { IAnkiConfig } from "../config/anki-config.interface";
 import { AnkiConnectRequest, AnkiConnectResponse } from "../types/anki.types";
+import { IdempotencyService } from "../../services/idempotency.service";
 
 /**
  * AnkiConnect is single-threaded (requests run on Anki's Qt main thread with
@@ -110,7 +111,10 @@ export class AnkiConnectClient {
   private readonly readOnly: boolean;
   private readonly logger = new Logger(AnkiConnectClient.name);
 
-  constructor(@Inject(ANKI_CONFIG) private readonly config: IAnkiConfig) {
+  constructor(
+    @Inject(ANKI_CONFIG) private readonly config: IAnkiConfig,
+    private readonly idempotencyService: IdempotencyService,
+  ) {
     this.apiVersion = config.ankiConnectApiVersion;
     this.apiKey = config.ankiConnectApiKey;
     this.readOnly = config.readOnly ?? false;
@@ -165,6 +169,18 @@ export class AnkiConnectClient {
     if (this.readOnly && WRITE_ACTIONS.has(action)) {
       this.logger.warn(`Blocked write action "${action}" in read-only mode`);
       throw new ReadOnlyModeError(action);
+    }
+
+    // Check idempotency: if an idempotencyKey is provided and we have a cached result, return it
+    const idempotencyKey = params?.idempotencyKey as string | undefined;
+    if (idempotencyKey && WRITE_ACTIONS.has(action)) {
+      const cached = this.idempotencyService.get(idempotencyKey, action);
+      if (cached) {
+        this.logger.log(
+          `Returning cached result for action "${action}" with idempotency key "${idempotencyKey}"`,
+        );
+        return cached.result as T;
+      }
     }
 
     const request: AnkiConnectRequest = {
@@ -223,6 +239,11 @@ export class AnkiConnectClient {
         this.logger.log(`AnkiConnect action successful: ${action}`);
         return response.result;
       });
+
+      // Store result for idempotency if key was provided
+      if (idempotencyKey && WRITE_ACTIONS.has(action)) {
+        this.idempotencyService.set(idempotencyKey, action, params, result);
+      }
 
       return result;
     } catch (error) {
