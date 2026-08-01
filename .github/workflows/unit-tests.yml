@@ -41,7 +41,7 @@ jobs:
       if: matrix.node-version == '22.x'
 
     - name: Upload coverage reports
-      uses: codecov/codecov-action@v4
+      uses: codecov/codecov-action@v7
       if: matrix.node-version == '22.x'
       continue-on-error: true
       with:
