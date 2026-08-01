@@ -71,7 +71,6 @@ import { IdempotencyService } from "../../../services/idempotency.service";
 import { ConfirmationService } from "../../../services/confirmation.service";
 import { AuditLogService } from "../../../services/audit-log.service";
 import { AppConfigService } from "../../../app-config.service";
-import { APP_CONFIG } from "../../../config";
 import { ANKI_CONFIG } from "../../config/anki-config.interface";
 import { SyncTool } from "./tools/sync.tool";
 import { GetDueCardsTool } from "./tools/get-due-cards.tool";
@@ -193,7 +192,7 @@ export class McpPrimitivesAnkiEssentialModule {
       {
         provide: ANKI_CONFIG,
         useValue: options.ankiConfigValue || {
-          ankiConnectUrl: 'http://localhost:8765',
+          ankiConnectUrl: "http://localhost:8765",
           ankiConnectApiKey: undefined,
           ankiConnectApiVersion: 6,
           ankiConnectTimeout: 5000,

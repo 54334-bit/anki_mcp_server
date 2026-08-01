@@ -1,12 +1,12 @@
-import { Injectable, Logger } from '@nestjs/common';
-import * as fs from 'fs';
-import * as path from 'path';
+import { Injectable, Logger } from "@nestjs/common";
+import * as fs from "fs";
+import * as path from "path";
 
 export interface AuditLogEntry {
   timestamp: string;
   action: string;
   parameters: any;
-  result: 'success' | 'failure' | 'pending';
+  result: "success" | "failure" | "pending";
   confirmationId?: string;
   userId?: string;
   ipAddress?: string;
@@ -21,9 +21,9 @@ export class AuditLogService {
 
   constructor() {
     // Store logs in user's home directory
-    const homeDir = process.env.HOME || process.env.USERPROFILE || '/tmp';
-    this.logDir = path.join(homeDir, '.anki-mcp-server');
-    this.logFile = path.join(this.logDir, 'audit.log');
+    const homeDir = process.env.HOME || process.env.USERPROFILE || "/tmp";
+    this.logDir = path.join(homeDir, ".anki-mcp-server");
+    this.logFile = path.join(this.logDir, "audit.log");
 
     // Ensure log directory exists
     if (!fs.existsSync(this.logDir)) {
@@ -36,18 +36,18 @@ export class AuditLogService {
   /**
    * Log an action
    */
-  async log(entry: Omit<AuditLogEntry, 'timestamp'>): Promise<void> {
+  async log(entry: Omit<AuditLogEntry, "timestamp">): Promise<void> {
     const logEntry: AuditLogEntry = {
       ...entry,
       timestamp: new Date().toISOString(),
     };
 
     try {
-      const logLine = JSON.stringify(logEntry) + '\n';
-      fs.appendFileSync(this.logFile, logLine, 'utf-8');
+      const logLine = JSON.stringify(logEntry) + "\n";
+      fs.appendFileSync(this.logFile, logLine, "utf-8");
       this.logger.debug(`Audit log: ${entry.action} - ${entry.result}`);
     } catch (error) {
-      this.logger.error('Failed to write audit log', error);
+      this.logger.error("Failed to write audit log", error);
     }
   }
 
@@ -62,7 +62,7 @@ export class AuditLogService {
     await this.log({
       action,
       parameters,
-      result: 'pending',
+      result: "pending",
       confirmationId,
     });
   }
@@ -73,7 +73,7 @@ export class AuditLogService {
   async logActionCompletion(
     action: string,
     parameters: any,
-    result: 'success' | 'failure',
+    result: "success" | "failure",
     error?: string,
   ): Promise<void> {
     await this.log({
@@ -93,13 +93,16 @@ export class AuditLogService {
         return [];
       }
 
-      const content = fs.readFileSync(this.logFile, 'utf-8');
-      const lines = content.trim().split('\n').filter(line => line.trim());
+      const content = fs.readFileSync(this.logFile, "utf-8");
+      const lines = content
+        .trim()
+        .split("\n")
+        .filter((line) => line.trim());
       const recentLines = lines.slice(-limit);
 
-      return recentLines.map(line => JSON.parse(line));
+      return recentLines.map((line) => JSON.parse(line));
     } catch (error) {
-      this.logger.error('Failed to read audit logs', error);
+      this.logger.error("Failed to read audit logs", error);
       return [];
     }
   }
@@ -110,11 +113,11 @@ export class AuditLogService {
   clearLogs(): void {
     try {
       if (fs.existsSync(this.logFile)) {
-        fs.writeFileSync(this.logFile, '', 'utf-8');
-        this.logger.log('Audit logs cleared');
+        fs.writeFileSync(this.logFile, "", "utf-8");
+        this.logger.log("Audit logs cleared");
       }
     } catch (error) {
-      this.logger.error('Failed to clear audit logs', error);
+      this.logger.error("Failed to clear audit logs", error);
     }
   }
 }

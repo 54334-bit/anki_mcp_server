@@ -1,5 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { randomUUID } from 'crypto';
+import { Injectable, Logger } from "@nestjs/common";
+import { randomUUID } from "crypto";
 
 export interface PendingAction {
   id: string;

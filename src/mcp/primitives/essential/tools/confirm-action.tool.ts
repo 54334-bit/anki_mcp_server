@@ -1,8 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { Tool } from '@rekog/mcp-nest';
-import { z } from 'zod';
-import { ConfirmationService } from '@/services/confirmation.service';
-import { AuditLogService } from '@/services/audit-log.service';
+import { Injectable, Logger } from "@nestjs/common";
+import { Tool } from "@rekog/mcp-nest";
+import { z } from "zod";
+import { ConfirmationService } from "@/services/confirmation.service";
+import { AuditLogService } from "@/services/audit-log.service";
 
 @Injectable()
 export class ConfirmActionTool {
@@ -14,13 +14,15 @@ export class ConfirmActionTool {
   ) {}
 
   @Tool({
-    name: 'confirmAction',
+    name: "confirmAction",
     description:
-      'Confirm a pending destructive action. Use this after reviewing the action details from a previous tool call that required confirmation.',
+      "Confirm a pending destructive action. Use this after reviewing the action details from a previous tool call that required confirmation.",
     parameters: z.object({
       confirmationId: z
         .string()
-        .describe('The confirmation ID returned by the destructive action tool'),
+        .describe(
+          "The confirmation ID returned by the destructive action tool",
+        ),
     }),
     outputSchema: z.object({
       success: z.boolean(),
@@ -29,7 +31,7 @@ export class ConfirmActionTool {
       parameters: z.any().optional(),
     }),
     annotations: {
-      title: 'Confirm Action',
+      title: "Confirm Action",
       readOnlyHint: false,
       destructiveHint: false,
       idempotentHint: false,
@@ -39,19 +41,20 @@ export class ConfirmActionTool {
     try {
       this.logger.log(`Confirming action: ${confirmationId}`);
 
-      const pendingAction = this.confirmationService.getPendingAction(confirmationId);
+      const pendingAction =
+        this.confirmationService.getPendingAction(confirmationId);
 
       if (!pendingAction) {
         return {
           success: false,
-          message: 'Action not found or expired',
+          message: "Action not found or expired",
         };
       }
 
       if (pendingAction.confirmed) {
         return {
           success: false,
-          message: 'Action already confirmed',
+          message: "Action already confirmed",
         };
       }
 
@@ -59,29 +62,30 @@ export class ConfirmActionTool {
 
       if (confirmed) {
         await this.auditLogService.log({
-          action: 'confirmAction',
+          action: "confirmAction",
           parameters: { confirmationId, originalAction: pendingAction.action },
-          result: 'success',
+          result: "success",
         });
 
         return {
           success: true,
-          message: 'Action confirmed. You can now execute the original operation.',
+          message:
+            "Action confirmed. You can now execute the original operation.",
           action: pendingAction.action,
           parameters: pendingAction.parameters,
         };
       } else {
         return {
           success: false,
-          message: 'Failed to confirm action',
+          message: "Failed to confirm action",
         };
       }
     } catch (error) {
-      this.logger.error('Failed to confirm action', error);
+      this.logger.error("Failed to confirm action", error);
       await this.auditLogService.log({
-        action: 'confirmAction',
+        action: "confirmAction",
         parameters: { confirmationId },
-        result: 'failure',
+        result: "failure",
         error: error instanceof Error ? error.message : String(error),
       });
 

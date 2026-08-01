@@ -74,15 +74,17 @@ export class DeleteNotesTool {
     try {
       // Step 1: If no confirmationId provided, create pending action
       if (!confirmationId) {
-        this.logger.log(`Creating pending deletion for ${notes.length} note(s)`);
+        this.logger.log(
+          `Creating pending deletion for ${notes.length} note(s)`,
+        );
 
         const pendingId = this.confirmationService.createPendingAction(
-          'deleteNotes',
+          "deleteNotes",
           { notes },
         );
 
         await this.auditLogService.logDestructiveAction(
-          'deleteNotes',
+          "deleteNotes",
           { notes, noteCount: notes.length },
           pendingId,
         );
@@ -94,7 +96,8 @@ export class DeleteNotesTool {
           confirmationId: pendingId,
           pendingAction: true,
           hint: `Call confirmAction with confirmationId="${pendingId}", then call deleteNotes again with the same confirmationId`,
-          warning: "This action will permanently delete notes and all associated cards",
+          warning:
+            "This action will permanently delete notes and all associated cards",
         };
       }
 
@@ -103,7 +106,7 @@ export class DeleteNotesTool {
         return {
           success: false,
           requestedIds: notes,
-          message: 'Action not confirmed or expired',
+          message: "Action not confirmed or expired",
           confirmationId,
           pendingAction: false,
           hint: `Call confirmAction with confirmationId="${confirmationId}" first`,
@@ -126,9 +129,9 @@ export class DeleteNotesTool {
         this.logger.warn("No valid notes found to delete");
 
         await this.auditLogService.logActionCompletion(
-          'deleteNotes',
+          "deleteNotes",
           { notes, noteCount: notes.length },
-          'success',
+          "success",
         );
 
         this.confirmationService.removeAction(confirmationId);
@@ -160,9 +163,9 @@ export class DeleteNotesTool {
       );
 
       await this.auditLogService.logActionCompletion(
-        'deleteNotes',
+        "deleteNotes",
         { notes, deletedCount: validNoteIds.length, cardsDeleted: totalCards },
-        'success',
+        "success",
       );
 
       this.confirmationService.removeAction(confirmationId);
@@ -187,9 +190,9 @@ export class DeleteNotesTool {
       this.logger.error("Failed to delete notes", error);
 
       await this.auditLogService.logActionCompletion(
-        'deleteNotes',
+        "deleteNotes",
         { notes },
-        'failure',
+        "failure",
         error instanceof Error ? error.message : String(error),
       );
 

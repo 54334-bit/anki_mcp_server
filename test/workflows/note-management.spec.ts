@@ -194,7 +194,7 @@ describe("Note Management Workflow", () => {
 
       const deleteRawResult = await deleteNotesTool.deleteNotes({
         notes: [newNoteId],
-        confirmationId: 'test-confirmation-id',
+        confirmationId: "test-confirmation-id",
       });
       const deleteResult = parseToolResult(deleteRawResult);
       expect(deleteResult.success).toBe(true);
@@ -301,7 +301,7 @@ describe("Note Management Workflow", () => {
 
       const deleteRawResult = await deleteNotesTool.deleteNotes({
         notes: noteIds,
-        confirmationId: 'test-confirmation-id',
+        confirmationId: "test-confirmation-id",
       });
       const deleteResult = parseToolResult(deleteRawResult);
       expect(deleteResult.deletedCount).toBe(3);

@@ -37,8 +37,6 @@ import { AnkiConnectClient } from "../../clients/anki-connect.client";
 import { IdempotencyService } from "../../../services/idempotency.service";
 import { ConfirmationService } from "../../../services/confirmation.service";
 import { AuditLogService } from "../../../services/audit-log.service";
-import { AppConfigService } from "../../../app-config.service";
-import { APP_CONFIG } from "../../../config";
 import { ANKI_CONFIG } from "../../config/anki-config.interface";
 import { GuiBrowseTool } from "./tools/gui-browse.tool";
 import { GuiSelectCardTool } from "./tools/gui-select-card.tool";
@@ -97,7 +95,7 @@ export class McpPrimitivesAnkiGuiModule {
       {
         provide: ANKI_CONFIG,
         useValue: options.ankiConfigValue || {
-          ankiConnectUrl: 'http://localhost:8765',
+          ankiConnectUrl: "http://localhost:8765",
           ankiConnectApiKey: undefined,
           ankiConnectApiVersion: 6,
           ankiConnectTimeout: 5000,

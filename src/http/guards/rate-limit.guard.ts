@@ -1,6 +1,13 @@
-import { Injectable, CanActivate, ExecutionContext, Logger, HttpException, HttpStatus } from '@nestjs/common';
-import { Request } from 'express';
-import { ConfigService } from '@nestjs/config';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  Logger,
+  HttpException,
+  HttpStatus,
+} from "@nestjs/common";
+import { Request } from "express";
+import { ConfigService } from "@nestjs/config";
 
 interface RateLimitEntry {
   timestamps: number[];
@@ -14,8 +21,11 @@ export class RateLimitGuard implements CanActivate {
   private readonly windowMs = 60 * 1000; // 1 minute
 
   constructor(private readonly configService: ConfigService) {
-    this.rateLimitPerMinute = this.configService.get<number>('rateLimitPerMinute') || 60;
-    this.logger.log(`Rate limiting enabled: ${this.rateLimitPerMinute} requests per minute`);
+    this.rateLimitPerMinute =
+      this.configService.get<number>("rateLimitPerMinute") || 60;
+    this.logger.log(
+      `Rate limiting enabled: ${this.rateLimitPerMinute} requests per minute`,
+    );
 
     // Clean up expired entries every minute
     setInterval(() => this.cleanupExpired(), 60 * 1000);
@@ -35,16 +45,20 @@ export class RateLimitGuard implements CanActivate {
     }
 
     // Remove timestamps outside the current window (sliding window)
-    entry.timestamps = entry.timestamps.filter(ts => ts > windowStart);
+    entry.timestamps = entry.timestamps.filter((ts) => ts > windowStart);
 
     // Check if rate limit exceeded
     if (entry.timestamps.length >= this.rateLimitPerMinute) {
-      this.logger.warn(`Rate limit exceeded for ${clientIp}: ${entry.timestamps.length}/${this.rateLimitPerMinute} requests`);
+      this.logger.warn(
+        `Rate limit exceeded for ${clientIp}: ${entry.timestamps.length}/${this.rateLimitPerMinute} requests`,
+      );
       throw new HttpException(
         {
           success: false,
           message: `Rate limit exceeded. Maximum ${this.rateLimitPerMinute} requests per minute.`,
-          retryAfter: Math.ceil((entry.timestamps[0] + this.windowMs - now) / 1000),
+          retryAfter: Math.ceil(
+            (entry.timestamps[0] + this.windowMs - now) / 1000,
+          ),
         },
         HttpStatus.TOO_MANY_REQUESTS,
       );
@@ -58,13 +72,13 @@ export class RateLimitGuard implements CanActivate {
 
   private getClientIp(request: Request): string {
     // Check X-Forwarded-For header (for proxied requests)
-    const forwarded = request.headers['x-forwarded-for'];
-    if (typeof forwarded === 'string') {
-      return forwarded.split(',')[0].trim();
+    const forwarded = request.headers["x-forwarded-for"];
+    if (typeof forwarded === "string") {
+      return forwarded.split(",")[0].trim();
     }
 
     // Fall back to request IP
-    return request.ip || 'unknown';
+    return request.ip || "unknown";
   }
 
   private cleanupExpired(): void {
@@ -73,7 +87,7 @@ export class RateLimitGuard implements CanActivate {
     let cleaned = 0;
 
     for (const [ip, entry] of this.clients.entries()) {
-      entry.timestamps = entry.timestamps.filter(ts => ts > windowStart);
+      entry.timestamps = entry.timestamps.filter((ts) => ts > windowStart);
       if (entry.timestamps.length === 0) {
         this.clients.delete(ip);
         cleaned++;

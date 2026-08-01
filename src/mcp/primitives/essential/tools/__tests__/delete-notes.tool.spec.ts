@@ -16,7 +16,6 @@ jest.mock("../../../../../services/audit-log.service");
 describe("DeleteNotesTool", () => {
   let tool: DeleteNotesTool;
   let ankiClient: jest.Mocked<AnkiConnectClient>;
-  let confirmationService: jest.Mocked<ConfirmationService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -26,7 +25,9 @@ describe("DeleteNotesTool", () => {
         {
           provide: ConfirmationService,
           useValue: {
-            createPendingAction: jest.fn().mockReturnValue('test-confirmation-id'),
+            createPendingAction: jest
+              .fn()
+              .mockReturnValue("test-confirmation-id"),
             isConfirmed: jest.fn().mockReturnValue(true),
             removeAction: jest.fn(),
           },
@@ -45,9 +46,6 @@ describe("DeleteNotesTool", () => {
     ankiClient = module.get(
       AnkiConnectClient,
     ) as jest.Mocked<AnkiConnectClient>;
-    confirmationService = module.get(
-      ConfirmationService,
-    ) as jest.Mocked<ConfirmationService>;
 
     jest.clearAllMocks();
   });
@@ -87,7 +85,7 @@ describe("DeleteNotesTool", () => {
       // Act
       const rawResult = await tool.deleteNotes({
         notes: noteIds,
-        confirmationId: 'test-confirmation-id',
+        confirmationId: "test-confirmation-id",
       });
       const result = parseToolResult(rawResult);
 
@@ -130,7 +128,7 @@ describe("DeleteNotesTool", () => {
       // Act
       const rawResult = await tool.deleteNotes({
         notes: noteIds,
-        confirmationId: 'test-confirmation-id',
+        confirmationId: "test-confirmation-id",
       });
       const result = parseToolResult(rawResult);
 
@@ -157,7 +155,7 @@ describe("DeleteNotesTool", () => {
       // Act
       const rawResult = await tool.deleteNotes({
         notes: noteIds,
-        confirmationId: 'test-confirmation-id',
+        confirmationId: "test-confirmation-id",
       });
       const result = parseToolResult(rawResult);
 
@@ -185,7 +183,7 @@ describe("DeleteNotesTool", () => {
       // Act
       const rawResult = await tool.deleteNotes({
         notes: noteIds,
-        confirmationId: 'test-confirmation-id',
+        confirmationId: "test-confirmation-id",
       });
       const result = parseToolResult(rawResult);
 
@@ -202,7 +200,7 @@ describe("DeleteNotesTool", () => {
       // Act
       const rawResult = await tool.deleteNotes({
         notes: noteIds,
-        confirmationId: 'test-confirmation-id',
+        confirmationId: "test-confirmation-id",
       });
       const result = parseToolResult(rawResult);
 
@@ -224,7 +222,7 @@ describe("DeleteNotesTool", () => {
       // Act
       const rawResult = await tool.deleteNotes({
         notes: noteIds,
-        confirmationId: 'test-confirmation-id',
+        confirmationId: "test-confirmation-id",
       });
       const result = parseToolResult(rawResult);
 
@@ -244,7 +242,7 @@ describe("DeleteNotesTool", () => {
       // Act
       const rawResult = await tool.deleteNotes({
         notes: tooManyNotes,
-        confirmationId: 'test-confirmation-id',
+        confirmationId: "test-confirmation-id",
       });
       const result = parseToolResult(rawResult);
 
@@ -263,7 +261,7 @@ describe("DeleteNotesTool", () => {
       // Act
       const rawResult = await tool.deleteNotes({
         notes: [mockNotes.spanish.noteId],
-        confirmationId: 'test-confirmation-id',
+        confirmationId: "test-confirmation-id",
       });
       const result = parseToolResult(rawResult);
 
@@ -280,7 +278,7 @@ describe("DeleteNotesTool", () => {
       // Act
       const _rawResult = await tool.deleteNotes({
         notes: [mockNotes.spanish.noteId],
-        confirmationId: 'test-confirmation-id',
+        confirmationId: "test-confirmation-id",
       });
 
       // Assert
@@ -300,7 +298,7 @@ describe("DeleteNotesTool", () => {
       // Act
       const rawResult = await tool.deleteNotes({
         notes: [mockNotes.spanish.noteId],
-        confirmationId: 'test-confirmation-id',
+        confirmationId: "test-confirmation-id",
       });
       const result = parseToolResult(rawResult);
 
@@ -319,7 +317,7 @@ describe("DeleteNotesTool", () => {
       // Act
       const rawResult = await tool.deleteNotes({
         notes: noteIds,
-        confirmationId: 'test-confirmation-id',
+        confirmationId: "test-confirmation-id",
       });
       const result = parseToolResult(rawResult);
 
@@ -337,7 +335,7 @@ describe("DeleteNotesTool", () => {
       // Act
       const rawResult = await tool.deleteNotes({
         notes: [mockNotes.spanish.noteId],
-        confirmationId: 'test-confirmation-id',
+        confirmationId: "test-confirmation-id",
       });
       const result = parseToolResult(rawResult);
 

@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from "@nestjs/common";
 
 export interface IdempotencyEntry {
   idempotencyKey: string;
@@ -25,7 +25,7 @@ export class IdempotencyService {
    */
   get(idempotencyKey: string, action: string): IdempotencyEntry | null {
     const entry = this.store.get(idempotencyKey);
-    
+
     if (!entry) {
       return null;
     }
@@ -40,7 +40,7 @@ export class IdempotencyService {
     if (entry.action !== action) {
       this.logger.warn(
         `Idempotency key ${idempotencyKey} reused for different action. ` +
-        `Expected: ${entry.action}, Got: ${action}`
+          `Expected: ${entry.action}, Got: ${action}`,
       );
       return null;
     }
@@ -66,7 +66,9 @@ export class IdempotencyService {
     };
 
     this.store.set(idempotencyKey, entry);
-    this.logger.debug(`Stored idempotency entry: ${idempotencyKey} for ${action}`);
+    this.logger.debug(
+      `Stored idempotency entry: ${idempotencyKey} for ${action}`,
+    );
   }
 
   /**

@@ -102,7 +102,13 @@ export class AppModule {
         ...ESSENTIAL_MCP_TOOLS,
         ...GUI_MCP_TOOLS,
       ],
-      exports: [APP_CONFIG, AppConfigService, ConfirmationService, AuditLogService, IdempotencyService],
+      exports: [
+        APP_CONFIG,
+        AppConfigService,
+        ConfirmationService,
+        AuditLogService,
+        IdempotencyService,
+      ],
     };
   }
 
@@ -181,7 +187,13 @@ export class AppModule {
         ...ESSENTIAL_MCP_TOOLS,
         ...GUI_MCP_TOOLS,
       ],
-      exports: [APP_CONFIG, AppConfigService, ConfirmationService, AuditLogService, IdempotencyService],
+      exports: [
+        APP_CONFIG,
+        AppConfigService,
+        ConfirmationService,
+        AuditLogService,
+        IdempotencyService,
+      ],
     };
   }
 
@@ -253,7 +265,14 @@ export class AppModule {
         ...ESSENTIAL_MCP_TOOLS,
         ...GUI_MCP_TOOLS,
       ],
-      exports: [APP_CONFIG, AppConfigService, TunnelMcpService, ConfirmationService, AuditLogService, IdempotencyService],
+      exports: [
+        APP_CONFIG,
+        AppConfigService,
+        TunnelMcpService,
+        ConfirmationService,
+        AuditLogService,
+        IdempotencyService,
+      ],
     };
   }
 }
