@@ -87,7 +87,7 @@
   },
   "devDependencies": {
     "@anthropic-ai/mcpb": "^2.1.2",
-    "@eslint/eslintrc": "^3.3.5",
+    "@eslint/eslintrc": "^3.3.7",
     "@eslint/js": "^10.0.1",
     "@modelcontextprotocol/inspector": "^0.22.0",
     "@nestjs/cli": "^11.0.23",
@@ -101,9 +101,9 @@
     "@types/supertest": "^7.2.0",
     "@types/update-notifier": "^6.0.8",
     "@types/ws": "^8.18.1",
-    "eslint": "^10.4.1",
+    "eslint": "^10.12.0",
     "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-prettier": "^5.5.6",
+    "eslint-plugin-prettier": "^5.5.7",
     "globals": "^17.6.0",
     "husky": "^9.1.7",
     "jest": "^30.4.2",
@@ -116,7 +116,7 @@
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.61.0"
+    "typescript-eslint": "^8.71.2"
   },
   "jest": {
     "moduleFileExtensions": [
